@@ -391,7 +391,7 @@ class AppSettings(AppLoggingSettings):
 
     OPENAI_BASE_URL: str | None = None
     """The base URL for the OpenAI API. Leave this unset for most usecases"""
-    OPENAI_API_KEY: MaskedNoneString = None
+    OPENAI_API_KEY: MaskedNoneString = os.getenv("OPEN_AI_KEY")
     """Your OpenAI API key. Required to enable OpenAI features"""
     OPENAI_MODEL: str = "gpt-4o"
     """Which OpenAI model to send requests to. Leave this unset for most usecases"""
