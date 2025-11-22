@@ -150,6 +150,10 @@ ENV/
 # mypy
 .mypy_cache/
 
+# Keys
+credentials.json
+token.json
+
 # Node Modules
 node_modules/
 *.db

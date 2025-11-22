@@ -7,6 +7,7 @@ from zipfile import ZipFile
 from mealie.services._base_service import BaseService
 from mealie.services.backups_v2.alchemy_exporter import AlchemyExporter
 from mealie.services.backups_v2.backup_file import BackupFile
+from mealie.services.google.google_drive_backup import GoogleDriveBackup
 
 
 class BackupSchemaMismatch(Exception): ...
@@ -56,6 +57,9 @@ class BackupV2(BaseService):
                         continue
 
                     zip_file.write(data_file, f"data/{data_file.relative_to(self.directories.DATA_DIR)}")
+
+        google_drive_backup = GoogleDriveBackup()
+        google_drive_backup.upload(file_path=backup_file, file_name=backup_name)
 
         return backup_file
 

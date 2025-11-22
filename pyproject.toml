@@ -55,6 +55,10 @@ openai = "^2.0.0"
 typing-extensions = "^4.12.2"
 itsdangerous = "^2.2.0"
 ingredient-parser-nlp = "^2.0.0"
+google-auth = "2.41.0"
+google-api-python-client = "^2.187.0"
+google-auth-oauthlib = "^1.2.3"
+google-auth-httplib2 = "^0.2.1"
 
 [tool.poetry.group.postgres.dependencies]
 psycopg2-binary = { version = "^2.9.1" }
