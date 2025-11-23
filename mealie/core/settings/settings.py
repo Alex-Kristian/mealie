@@ -387,16 +387,25 @@ class AppSettings(AppLoggingSettings):
         return self.OIDC_FEATURE.enabled
 
     # ===============================================
+    # AI Provider Configuration
+    PROVIDER_GOOGLE: str = "Gemini"
+    PROVIDER_OPENAI: str = "OpenAI"
+    AI_PROVIDER: str = PROVIDER_GOOGLE
+    """This determines which AI provider is used by the openai package.
+       Set AI_PROVIDER to PROVIDER_GOOGLE if using Gemini or PROVIDER_OPENAI."""
+
+    # ===============================================
     # OpenAI Configuration
 
     # OPENAI_BASE_URL: str | None = None
-    OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL")
+    OPENAI_BASE_URL: str | None = os.getenv("OPENAI_BASE_URL")
     """The base URL for the OpenAI API. Leave this unset for most usecases"""
     OPENAI_API_KEY: MaskedNoneString = os.getenv("OPEN_AI_KEY")
     """Your OpenAI API key. Required to enable OpenAI features"""
-    OPENAI_MODEL: str = os.getenv("OPEN_AI_MODEL")
+    OPENAI_MODEL: str | None = os.getenv("OPEN_AI_MODEL")
     # OPENAI_MODEL: str = "gpt-4o"
     """Which OpenAI model to send requests to. Leave this unset for most usecases"""
+
     OPENAI_CUSTOM_HEADERS: dict[str, str] = {}
     """Custom HTTP headers to send with each OpenAI request"""
     OPENAI_CUSTOM_PARAMS: dict[str, Any] = {}
@@ -435,6 +444,32 @@ class AppSettings(AppLoggingSettings):
     def OPENAI_ENABLED(self) -> bool:
         """Validates OpenAI settings are all set"""
         return self.OPENAI_FEATURE.enabled
+
+    # ===============================================
+    # Google Gemini Configuration
+    GEMINI_API_KEY: str = os.getenv("GEMINI_API_KEYL")
+    GEMINI_MODEL: str = os.getenv("GEMINI_MODEL")
+    GEMINI_BASE_URL: str = os.getenv("GEMINI_BASE_URL")
+
+    @property
+    def GEMINI_FEATURE(self) -> FeatureDetails:
+        description = None
+        if not self.GEMINI_API_KEY:
+            description = "GEMINI_API_KEY is not set"
+        elif not self.GEMINI_MODEL:
+            description = "GEMINI_MODEL is not set"
+        elif not self.GEMINI_BASE_URL:
+            description = "GEMINI_BASE_URL is not set"
+
+        return FeatureDetails(
+            enabled=bool(self.GEMINI_API_KEY and self.GEMINI_MODEL and self.GEMINI_BASE_URL),
+            description=description,
+        )
+
+    @property
+    def GEMINI_ENABLED(self) -> bool:
+        """Validates OpenAI settings are all set"""
+        return self.GEMINI_FEATURE.enabled
 
     # ===============================================
     # Web Concurrency
