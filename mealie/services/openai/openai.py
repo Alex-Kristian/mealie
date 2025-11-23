@@ -78,21 +78,43 @@ class OpenAIService(BaseService):
 
     def __init__(self) -> None:
         settings = get_app_settings()
-        if not settings.OPENAI_ENABLED:
-            raise ValueError("OpenAI is not enabled")
 
-        self.model = settings.OPENAI_MODEL
-        self.workers = settings.OPENAI_WORKERS
-        self.send_db_data = settings.OPENAI_SEND_DATABASE_DATA
-        self.enable_image_services = settings.OPENAI_ENABLE_IMAGE_SERVICES
+        if settings.AI_PROVIDER == settings.PROVIDER_OPENAI:
+            if not settings.OPENAI_ENABLED:
+                raise ValueError("OpenAI is not enabled")
 
-        self.get_client = lambda: AsyncOpenAI(
-            base_url=settings.OPENAI_BASE_URL,
-            api_key=settings.OPENAI_API_KEY,
-            timeout=settings.OPENAI_REQUEST_TIMEOUT,
-            default_headers=settings.OPENAI_CUSTOM_HEADERS,
-            default_query=settings.OPENAI_CUSTOM_PARAMS,
-        )
+            self.model = settings.OPENAI_MODEL
+            self.workers = settings.OPENAI_WORKERS
+            self.send_db_data = settings.OPENAI_SEND_DATABASE_DATA
+            self.enable_image_services = settings.OPENAI_ENABLE_IMAGE_SERVICES
+
+            self.get_client = lambda: AsyncOpenAI(
+                base_url=settings.OPENAI_BASE_URL,
+                api_key=settings.OPENAI_API_KEY,
+                timeout=settings.OPENAI_REQUEST_TIMEOUT,
+                default_headers=settings.OPENAI_CUSTOM_HEADERS,
+                default_query=settings.OPENAI_CUSTOM_PARAMS,
+            )
+
+        elif settings.AI_PROVIDER == settings.PROVIDER_GOOGLE:
+            if not settings.GEMINI_ENABLED:
+                raise ValueError("Gemini is not enabled")
+
+            self.model = settings.GEMINI_MODEL
+
+            # these settings are used by both openai and gemini
+            self.workers = settings.OPENAI_WORKERS
+            self.send_db_data = settings.OPENAI_SEND_DATABASE_DATA
+            self.enable_image_services = settings.OPENAI_ENABLE_IMAGE_SERVICES
+
+            self.get_client = lambda: AsyncOpenAI(
+                base_url=settings.GEMINI_BASE_URL,
+                api_key=settings.GEMINI_API_KEY,
+                # these settings are used by both openai and gemini
+                timeout=settings.OPENAI_REQUEST_TIMEOUT,
+                default_headers=settings.OPENAI_CUSTOM_HEADERS,
+                default_query=settings.OPENAI_CUSTOM_PARAMS,
+            )
 
         super().__init__()
 
