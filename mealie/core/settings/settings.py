@@ -432,7 +432,11 @@ class AppSettings(AppLoggingSettings):
     def OPENAI_FEATURE(self) -> FeatureDetails:
         description = None
         if self.AI_PROVIDER is not self.PROVIDER_OPENAI:
-            description = "AI_PROVIDER is not set to PROVIDER_OPENAI"
+            if self.AI_PROVIDER is None:
+                description = "Mealie AI services are disabled: AI_PROVIDER is None"
+            else:
+                description = "AI_PROVIDER is not set to PROVIDER_OPENAI"
+
         elif not self.OPENAI_API_KEY:
             description = "OPENAI_API_KEY is not set"
         elif not self.OPENAI_MODEL:
@@ -458,7 +462,10 @@ class AppSettings(AppLoggingSettings):
     def GEMINI_FEATURE(self) -> FeatureDetails:
         description = None
         if self.AI_PROVIDER is not self.PROVIDER_GOOGLE:
-            description = "AI_PROVIDER is not set to PROVIDER_GOOGLE"
+            if self.AI_PROVIDER is None:
+                description = "Mealie AI services are disabled: AI_PROVIDER is None"
+            else:
+                description = "AI_PROVIDER is not set to PROVIDER_GOOGLE"
         elif not self.GEMINI_API_KEY:
             description = "GEMINI_API_KEY is not set"
         elif not self.GEMINI_MODEL:
