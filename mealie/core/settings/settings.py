@@ -431,7 +431,7 @@ class AppSettings(AppLoggingSettings):
     @property
     def OPENAI_FEATURE(self) -> FeatureDetails:
         description = None
-        if self.AI_PROVIDER is not self.PROVIDER_GOOGLE:
+        if self.AI_PROVIDER is not self.PROVIDER_OPENAI:
             description = "AI_PROVIDER is not set to PROVIDER_OPENAI"
         elif not self.OPENAI_API_KEY:
             description = "OPENAI_API_KEY is not set"

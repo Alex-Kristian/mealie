@@ -79,6 +79,7 @@ class OpenAIService(BaseService):
     def __init__(self) -> None:
         settings = get_app_settings()
 
+        # Run using openai models and services
         if settings.AI_PROVIDER == settings.PROVIDER_OPENAI:
             if not settings.OPENAI_ENABLED:
                 raise ValueError("OpenAI is not enabled")
@@ -96,6 +97,7 @@ class OpenAIService(BaseService):
                 default_query=settings.OPENAI_CUSTOM_PARAMS,
             )
 
+        # Run using google models and services
         elif settings.AI_PROVIDER == settings.PROVIDER_GOOGLE:
             if not settings.GEMINI_ENABLED:
                 raise ValueError("Gemini is not enabled")
