@@ -389,11 +389,13 @@ class AppSettings(AppLoggingSettings):
     # ===============================================
     # OpenAI Configuration
 
-    OPENAI_BASE_URL: str | None = None
+    # OPENAI_BASE_URL: str | None = None
+    OPENAI_BASE_URL: str = os.getenv("OPENAI_BASE_URL")
     """The base URL for the OpenAI API. Leave this unset for most usecases"""
     OPENAI_API_KEY: MaskedNoneString = os.getenv("OPEN_AI_KEY")
     """Your OpenAI API key. Required to enable OpenAI features"""
-    OPENAI_MODEL: str = "gpt-4o"
+    OPENAI_MODEL: str = os.getenv("OPEN_AI_MODEL")
+    # OPENAI_MODEL: str = "gpt-4o"
     """Which OpenAI model to send requests to. Leave this unset for most usecases"""
     OPENAI_CUSTOM_HEADERS: dict[str, str] = {}
     """Custom HTTP headers to send with each OpenAI request"""
