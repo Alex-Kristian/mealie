@@ -390,9 +390,10 @@ class AppSettings(AppLoggingSettings):
     # AI Provider Configuration
     PROVIDER_GOOGLE: str = "Gemini"
     PROVIDER_OPENAI: str = "OpenAI"
-    AI_PROVIDER: str = PROVIDER_OPENAI
+    AI_PROVIDER: str | None = None
     """This determines which AI provider is used by the openai package.
-       Set AI_PROVIDER to PROVIDER_GOOGLE if using Gemini or PROVIDER_OPENAI."""
+       Set AI_PROVIDER to PROVIDER_GOOGLE if using Gemini or PROVIDER_OPENAI.
+       Leave AI_PROVIDER set to None if you dont want to enable Mealies AI Features"""
 
     # ===============================================
     # OpenAI Configuration
@@ -430,13 +431,15 @@ class AppSettings(AppLoggingSettings):
     @property
     def OPENAI_FEATURE(self) -> FeatureDetails:
         description = None
-        if not self.OPENAI_API_KEY:
+        if self.AI_PROVIDER is not self.PROVIDER_GOOGLE:
+            description = "AI_PROVIDER is not set to PROVIDER_OPENAI"
+        elif not self.OPENAI_API_KEY:
             description = "OPENAI_API_KEY is not set"
         elif not self.OPENAI_MODEL:
             description = "OPENAI_MODEL is not set"
 
         return FeatureDetails(
-            enabled=bool(self.OPENAI_API_KEY and self.OPENAI_MODEL),
+            enabled=bool((self.AI_PROVIDER is self.PROVIDER_OPENAI) and self.OPENAI_API_KEY and self.OPENAI_MODEL),
             description=description,
         )
 
@@ -454,7 +457,9 @@ class AppSettings(AppLoggingSettings):
     @property
     def GEMINI_FEATURE(self) -> FeatureDetails:
         description = None
-        if not self.GEMINI_API_KEY:
+        if self.AI_PROVIDER is not self.PROVIDER_GOOGLE:
+            description = "AI_PROVIDER is not set to PROVIDER_GOOGLE"
+        elif not self.GEMINI_API_KEY:
             description = "GEMINI_API_KEY is not set"
         elif not self.GEMINI_MODEL:
             description = "GEMINI_MODEL is not set"
@@ -462,7 +467,12 @@ class AppSettings(AppLoggingSettings):
             description = "GEMINI_BASE_URL is not set"
 
         return FeatureDetails(
-            enabled=bool(self.GEMINI_API_KEY and self.GEMINI_MODEL and self.GEMINI_BASE_URL),
+            enabled=bool(
+                (self.AI_PROVIDER is self.PROVIDER_GOOGLE)
+                and self.GEMINI_API_KEY
+                and self.GEMINI_MODEL
+                and self.GEMINI_BASE_URL
+            ),
             description=description,
         )
 
