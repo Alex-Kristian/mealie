@@ -329,7 +329,7 @@ class RecipeScraperOpenAI(RecipeScraperPackage):
 
     async def get_html(self, url: str) -> str:
         settings = get_app_settings()
-        if not settings.OPENAI_ENABLED:
+        if not settings.OPENAI_ENABLED and not settings.GEMINI_ENABLED:
             return ""
 
         html = self.raw_html or await safe_scrape_html(url)

@@ -481,7 +481,7 @@ class OpenAIRecipeService(RecipeServiceBase):
 
     async def build_recipe_from_images(self, images: list[Path], translate_language: str | None) -> Recipe:
         settings = get_app_settings()
-        if not (settings.OPENAI_ENABLED and settings.OPENAI_ENABLE_IMAGE_SERVICES):
+        if (not settings.OPENAI_ENABLED and not settings.GEMINI_ENABLED) and settings.OPENAI_ENABLE_IMAGE_SERVICES:
             raise ValueError("OpenAI image services are not available")
 
         openai_service = OpenAIService()
