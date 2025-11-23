@@ -35,8 +35,10 @@ class AdminAboutController(BaseAdminController):
             enable_oidc=settings.OIDC_AUTH_ENABLED,
             oidc_redirect=settings.OIDC_AUTO_REDIRECT,
             oidc_provider_name=settings.OIDC_PROVIDER_NAME,
-            enable_openai=settings.OPENAI_ENABLED,
-            enable_openai_image_services=settings.OPENAI_ENABLED and settings.OPENAI_ENABLE_IMAGE_SERVICES,
+            enable_openai=(settings.OPENAI_ENABLED or settings.GEMINI_ENABLED),
+            enable_openai_image_services=(
+                (settings.OPENAI_ENABLED or settings.GEMINI_ENABLED) and settings.OPENAI_ENABLE_IMAGE_SERVICES
+            ),
         )
 
     @router.get("/statistics", response_model=AppStatistics)
@@ -60,5 +62,5 @@ class AdminAboutController(BaseAdminController):
             base_url_set=settings.BASE_URL != "http://localhost:8080",
             is_up_to_date=APP_VERSION == "develop" or APP_VERSION == "nightly" or get_latest_version() == APP_VERSION,
             oidc_ready=settings.OIDC_READY,
-            enable_openai=settings.OPENAI_ENABLED,
+            enable_openai=(settings.OPENAI_ENABLED or settings.GEMINI_ENABLED),
         )
