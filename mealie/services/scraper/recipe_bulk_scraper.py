@@ -79,7 +79,7 @@ class RecipeBulkScraperService(BaseService):
         self.report.entries = new_entries
         self.repos.group_reports.update(self.report.id, self.report)
 
-    async def scrape(self, urls: CreateRecipeByUrlBulk) -> None:
+    async def old_scrape(self, urls: CreateRecipeByUrlBulk) -> None:
         sem = asyncio.Semaphore(3)
 
         async def _do(url: str) -> Recipe | None:
@@ -123,5 +123,65 @@ class RecipeBulkScraperService(BaseService):
                     exception="",
                 )
             )
+
+        self._save_all_entries()
+
+    ##Enhancement Scrape Function that saves many recipes at once
+    async def scrape(self, urls: CreateRecipeByUrlBulk) -> None:
+        sem = asyncio.Semaphore(3)
+        scraped_recipes: list[Recipe] = []
+        error_entries = []
+
+        async def _do(url: str) -> Recipe | None:
+            async with sem:
+                try:
+                    recipe, _ = await create_from_html(url, self.translator)
+                    return recipe
+                except Exception as e:
+                    self.service.logger.error(f"failed to scrape url during bulk url import {url}")
+                    self.service.logger.exception(e)
+                    self._add_error_entry(f"failed to scrape url {url}", str(e))
+                    return None
+
+        if self.report is None:
+            self.get_report_id()
+        tasks = [_do(b.url) for b in urls.imports]
+        results = await asyncio.gather(*tasks, return_exceptions=True)
+
+        for b, recipe in zip(urls.imports, results, strict=True):
+            if recipe is None or isinstance(recipe, BaseException):
+                msg = f"Failed to scrape url {b.url}"
+                self.service.logger.error(msg)
+                self.service.logger.exception(msg)
+                error_entries.append((msg, str(recipe)))
+                continue
+
+            if b.tags:
+                recipe.tags = b.tags
+
+            if b.categories:
+                recipe.recipe_category = b.categories
+
+            scraped_recipes.append(recipe)
+        try:
+            self.service.create_many(scraped_recipes)
+        except Exception as e:
+            self.service.logger.error("Batch save failed")
+            self.service.logger.exception(e)
+            self._add_error_entry(f"Failed to save recipe to database during bulk url import {b.url}", str(e))
+            for r in scraped_recipes:
+                error_entries.append((f"Failed batch insert for {r.name}", str(e)))
+
+        for recipe in scraped_recipes:
+            self.report_entries.append(
+                ReportEntryCreate(
+                    report_id=self.report.id,
+                    success=True,
+                    message=f"Successfully imported recipe {recipe.name}",
+                    exception="",
+                )
+            )
+        for msg, ex in error_entries:
+            self._add_error_entry(msg, ex)
 
         self._save_all_entries()

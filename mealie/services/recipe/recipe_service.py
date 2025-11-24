@@ -204,6 +204,76 @@ class RecipeService(RecipeServiceBase):
         self.repos.recipe_timeline_events.create(timeline_event_data)
         return new_recipe
 
+    def create_many(self, create_datas: list[Recipe | CreateRecipe]) -> list[Recipe]:
+        if not create_datas:
+            return []
+
+        recipe_models_to_insert = []
+        ratings_to_create = []
+        timeline_events_to_create = []
+
+        for create_data in create_datas:
+            if create_data.name is None:
+                create_data.name = "New Recipe"
+
+            data: Recipe = self._recipe_creation_factory(
+                name=create_data.name, additional_attrs=create_data.model_dump()
+            )
+
+            if isinstance(create_data, CreateRecipe) or create_data.settings is None:
+                if self.household.preferences is not None:
+                    data.settings = RecipeSettings(
+                        public=self.household.preferences.recipe_public,
+                        show_nutrition=self.household.preferences.recipe_show_nutrition,
+                        show_assets=self.household.preferences.recipe_show_assets,
+                        landscape_view=self.household.preferences.recipe_landscape_view,
+                        disable_comments=self.household.preferences.recipe_disable_comments,
+                    )
+                else:
+                    data.settings = RecipeSettings()
+            else:
+                data.settings = create_data.settings
+
+            rating_input = data.rating
+            data._initial_rating = rating_input if rating_input else None
+            data.rating = None
+            data.last_made = None
+
+            recipe_models_to_insert.append(data)
+
+        created_recipes = self.repos.recipes.create_many(recipe_models_to_insert)
+
+        for created, original in zip(created_recipes, recipe_models_to_insert, strict=True):
+            initial_rating = getattr(original, "_initial_rating", None) or getattr(created, "_initial_rating", None)
+            if initial_rating:
+                ratings_to_create.append(
+                    UserRatingCreate(
+                        user_id=self.user.id,
+                        recipe_id=created.id,
+                        rating=initial_rating,
+                        is_favorite=False,
+                    )
+                )
+
+            timeline_events_to_create.append(
+                RecipeTimelineEventCreate(
+                    user_id=created.user_id,
+                    recipe_id=created.id,
+                    subject=self.t("recipe.recipe-created"),
+                    event_type=TimelineEventType.system,
+                    timestamp=created.created_at or datetime.now(UTC),
+                )
+            )
+
+        if ratings_to_create:
+            self.repos.user_ratings.create_many(ratings_to_create)
+
+        if timeline_events_to_create:
+            self.repos.recipe_timeline_events.create_many(timeline_events_to_create)
+
+        results = [r if isinstance(r, Recipe) else self.repos.recipes.schema.model_validate(r) for r in created_recipes]
+        return results
+
     def _transform_user_id(self, user_id: str) -> str:
         query = self.repos.users.get_one(user_id)
         if query:
