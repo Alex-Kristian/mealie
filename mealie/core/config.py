@@ -20,6 +20,11 @@ PRODUCTION = os.getenv("PRODUCTION", "True").lower() in ["true", "1"]
 TESTING = os.getenv("TESTING", "False").lower() in ["true", "1"]
 DATA_DIR = os.getenv("DATA_DIR")
 
+# ---------------------------------------
+# Concurrency Settings (Feature 3)
+# ---------------------------------------
+MAX_CONCURRENT_TASKS = 10
+
 
 def determine_data_dir() -> Path:
     global PRODUCTION, TESTING, BASE_DIR, DATA_DIR
