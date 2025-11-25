@@ -4,6 +4,7 @@ from uuid import uuid4
 
 from fastapi import HTTPException, status
 from slugify import slugify
+import httpx
 
 from mealie.core.root_logger import get_logger
 from mealie.lang.providers import Translator
@@ -41,6 +42,34 @@ async def create_from_html(
         if not extracted_url:
             raise HTTPException(status.HTTP_400_BAD_REQUEST, {"details": ParserErrors.BAD_RECIPE_DATA.value})
         url = extracted_url.group(0)
+
+        # Fetch HTML here so RecipeScraper can be passed the content directly.
+        try:
+            async with httpx.AsyncClient(timeout=30) as client:
+                response = await client.get(url)
+                response.raise_for_status()
+                html = response.text
+        except httpx.HTTPStatusError as e:
+            logger = get_logger()
+            logger.exception(f"HTTP error fetching URL {url}: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={"details": ParserErrors.CONNECTION_ERROR.value},
+            )
+        except httpx.RequestError as e:
+            logger = get_logger()
+            logger.exception(f"Connection error fetching URL {url}: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={"details": ParserErrors.CONNECTION_ERROR.value},
+            )
+        except Exception as e:
+            logger = get_logger()
+            logger.exception(f"Unexpected error fetching URL {url}: {e}")
+            raise HTTPException(
+                status_code=status.HTTP_502_BAD_GATEWAY,
+                detail={"details": ParserErrors.CONNECTION_ERROR.value},
+            )
 
     new_recipe, extras = await scraper.scrape(url, html)
 
