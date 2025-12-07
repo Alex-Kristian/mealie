@@ -21,6 +21,14 @@
             @update:model-value="updateValue(key, $event)"
           />
         </div>
+        <v-btn
+          color="primary"
+          size="small"
+          class="mt-4"
+          @click="generateNutrition"
+        >
+          Generate Nutrition
+        </v-btn>
       </v-card-text>
       <v-list
         v-if="showViewer"
@@ -49,13 +57,17 @@
 import { useNutritionLabels } from "~/composables/recipes";
 import type { Nutrition } from "~/lib/api/types/recipe";
 import type { NutritionLabelType } from "~/composables/recipes/use-recipe-nutrition";
+import { useUserApi } from "~/composables/api/api-client";
 
 interface Props {
   edit?: boolean;
+  recipeId: string;
 }
 const props = withDefaults(defineProps<Props>(), {
   edit: true,
 });
+
+const emit = defineEmits(["update:modelValue"]);
 
 const modelValue = defineModel<Nutrition>({ required: true });
 
@@ -88,6 +100,19 @@ const renderedList = computed(() => {
     return item;
   }, {});
 });
+
+async function generateNutrition() {
+  const api = useUserApi();
+
+  const { data, error } = await api.ai.generateNutrition(props.recipeId);
+
+  if (error) {
+    console.error("AI nutrition generation failed", error);
+    return;
+  }
+
+  emit("update:modelValue", data);
+}
 </script>
 
 <style lang="scss" scoped></style>
