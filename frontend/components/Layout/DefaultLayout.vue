@@ -218,6 +218,15 @@ export default defineNuxtComponent({
         hide: !showImageImport.value,
       },
       {
+        insertDivider: false,
+        icon: $globals.icons.robot,
+        title: i18n.t("recipe.generate-recipe"),
+        subtitle: i18n.t("recipe.generate-recipe-subtitle"),
+        to: `/g/${groupSlug.value}/r/create/generate`,
+        restricted: true,
+        hide: !showImageImport.value,
+      },
+      {
         insertDivider: true,
         icon: $globals.icons.edit,
         title: i18n.t("general.create"),

@@ -90,6 +90,11 @@ export default defineNuxtComponent({
         value: "new",
       },
       {
+        icon: $globals.icons.robot,
+        text: "Generate with AI",
+        value: "generate",
+      },
+      {
         icon: $globals.icons.zip,
         text: i18n.t("recipe.import-with-zip"),
         value: "zip",
