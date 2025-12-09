@@ -7,6 +7,7 @@ You are a nutrition estimation expert. You will are given a list of ingredients 
 - For example, Do NOT include "g", "mg", or "kcal" in the JSON schema.
 - If you cannot estimate a value, omit the key entirely.
 - No commentary, no markdown.
+- Use https://fdc.nal.usda.gov/food-search?type=Foundation as a reference for accurate nutrition values, if you dont find the ingredient, look for other soruces.
 
 
 ### JSON SCHEMA
@@ -32,6 +33,7 @@ Here is an example output:
   "proteinContent": 18,
   "sodiumContent": 640
 }
+
 
 
 ### INPUT INGREDIENTS

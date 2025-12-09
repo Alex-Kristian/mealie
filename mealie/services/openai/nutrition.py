@@ -31,7 +31,13 @@ class NutritionAIService(BaseService):
         """Extract recipe ingredients from Recipe object for AI prompting."""
         result = []
         for ing in recipe.recipe_ingredient or []:
-            text = ing.note or ing.food or ""
+            name = str(ing.food.name) if ing.food is not None else ""
+            quantity = str(ing.quantity) if ing.quantity is not None else ""
+            unit = str(ing.unit.name) if ing.unit is not None else ""
+            note = str(ing.note) if ing.note is not None else ""
+
+            text = name + " " + quantity + " " + unit + " " + note or ""
+
             if text:
                 result.append(text)
         return result

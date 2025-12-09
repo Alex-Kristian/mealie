@@ -27,7 +27,7 @@
           class="mt-4"
           @click="generateNutrition"
         >
-          Generate Nutrition
+          Generate Nutrition Estimate
         </v-btn>
       </v-card-text>
       <v-list
