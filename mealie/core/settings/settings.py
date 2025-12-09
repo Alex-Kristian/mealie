@@ -390,7 +390,7 @@ class AppSettings(AppLoggingSettings):
     # AI Provider Configuration
     PROVIDER_GOOGLE: str = "Gemini"
     PROVIDER_OPENAI: str = "OpenAI"
-    AI_PROVIDER: str | None = PROVIDER_OPENAI
+    AI_PROVIDER: str | None = None
     """This determines which AI provider is used by the openai package.
        Set AI_PROVIDER to PROVIDER_GOOGLE if using Gemini or PROVIDER_OPENAI.
        Leave AI_PROVIDER set to None if you dont want to enable Mealies AI Features"""
